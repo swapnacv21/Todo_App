@@ -17,6 +17,13 @@ function List(){
         setEditing(true)
         setEditData(task)
     }
+
+    const updateDtls = (id,task) =>{
+        setEditing(false)
+        axios.put('',task).then(res=>{
+            SetData(data.map((prv)=>prv.id===id ? res.data : prv))
+        }).catch(error =>console.log(error.message))
+    }
     return(
 
         <div className="container">
@@ -41,18 +48,26 @@ function List(){
                     ))}
                 </tbody>
             </table>
-            {editing ? <EditForm curTask = {editdata}/>:null}
+            {editing ? <EditForm curTask = {editdata} updataefun={updateDtls}/>:null}
         </div>
     )
 
 }
 
-const EditForm = ({curTask})=>{
+const EditForm = ({curTask,updataefun})=>{
     const[task,setTask] = useState(curTask)
+    const handleChange = (e) =>{
+        const {name,value} = e.target 
+        setTask({...task,[name]:value})
+    }
+    const handleSubmit = (e) =>{
+        e.preventDefault()
+        updataefun(task.id,task)
+    }
     return(
-        <form>
-            <input type="text" name="title" id="title" value={task.title}/>
-            <input type="text" name="description" id="description" value={task.description}/>
+        <form onSubmit={handleSubmit}>
+            <input type="text" name="title" id="title" value={task.title} onChange={handleChange}/>
+            <input type="text" name="description" id="description" value={task.description} onChange={handleChange}/>
             <input type="submit" value="Update"/>
 
         </form>
