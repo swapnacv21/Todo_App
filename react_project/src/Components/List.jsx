@@ -2,11 +2,11 @@ import { useEffect,useState } from "react";
 import axios from 'axios'
 
 
+
 function List(){
     const [data,SetData] = useState([])
     const [editing,setEditing] = useState(false)
     const [editdata,setEditData] = useState(null)
-
     useEffect(()=>{
         axios.get('http://127.0.0.1:8000/api/todo/').then((res) =>{
             console.log(res.data);
@@ -20,12 +20,18 @@ function List(){
 
     const updateDtls = (id,task) =>{
         setEditing(false)
-        axios.put('',task).then(res=>{
+        axios.put(`http://127.0.0.1:8000/api/todo/${id}/`,task).then(res=>{
             SetData(data.map((prv)=>prv.id===id ? res.data : prv))
         }).catch(error =>console.log(error.message))
     }
-    return(
 
+    const Delete_dtls = (id) => {
+        axios.delete(`http://127.0.0.1:8000/api/todo/${id}/`).then (res=>{
+            SetData(data.filter((task)=>task.id!=id))
+        }).catch(error=>console.log(error.message)
+        )
+    }
+    return(
         <div className="container">
             <h1>Display Details</h1>
             <table className="table">
@@ -39,11 +45,11 @@ function List(){
                 <tbody>
                     {data.map((value,index)=>(
                         <tr key={index}>
-                            <td>{value.title}</td>
+                            <td>{value.task}</td>
                             <td>{value.description}</td>
                             <td>{value.completed ? 'completed' : 'not'}</td>
                             <td><button className="btn btn-outline-info" onClick={()=>{Edit_dtls(value)}}>Edit</button></td>
-                            <td><button className="btn btn-outline-danger" onClick={()=>{}}>Delete</button></td>
+                            <td><button className="btn btn-outline-danger" onClick={()=>{Delete_dtls(value.id)}}>Delete</button></td>
                         </tr>
                     ))}
                 </tbody>
@@ -51,9 +57,7 @@ function List(){
             {editing ? <EditForm curTask = {editdata} updataefun={updateDtls}/>:null}
         </div>
     )
-
 }
-
 const EditForm = ({curTask,updataefun})=>{
     const[task,setTask] = useState(curTask)
     const handleChange = (e) =>{
@@ -66,7 +70,7 @@ const EditForm = ({curTask,updataefun})=>{
     }
     return(
         <form onSubmit={handleSubmit}>
-            <input type="text" name="title" id="title" value={task.title} onChange={handleChange}/>
+            <input type="text" name="title" id="title" value={task.task} onChange={handleChange}/>
             <input type="text" name="description" id="description" value={task.description} onChange={handleChange}/>
             <input type="submit" value="Update"/>
 
